@@ -1,5 +1,6 @@
 package app.hushmessenger.extension;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RecordingCanvas;
@@ -153,10 +154,15 @@ public final class IosBars {
         }
     }
 
-    /** Whether [chat] is drawn by a chat head or an Android bubble rather than by Messenger's own chat screen. */
+    /**
+     * Whether [chat] is drawn by a chat head or an Android bubble rather than by Messenger's own chat screen. A phone
+     * can report a bubble as an ordinary activity, so a chat that sits in multi-window mode or in a window narrower
+     * than the screen counts as one too. A chat wrongly counted just stays stock, which costs only the frosted bars.
+     */
     private static boolean inChatHeadOrBubble(View chat) {
         try {
-            return ChatHeadVideo.inChatHead(chat.getContext());
+            Context context = chat.getContext();
+            return ChatHeadVideo.inChatHead(context) || ChatHeadVideo.inBubbleActivity(ChatJump.activity(context));
         } catch (Throwable error) {
             return false;
         }

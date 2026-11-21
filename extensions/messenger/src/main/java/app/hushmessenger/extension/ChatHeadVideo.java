@@ -3,6 +3,8 @@ package app.hushmessenger.extension;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
+import android.view.View;
+import android.view.Window;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,5 +69,26 @@ public final class ChatHeadVideo {
         // normal screen's layout and the gallery button opening nothing. The bubble's own screen is named, so ask that.
         if (BUBBLE_ACTIVITY.equals(activity.getClass().getName())) return true;
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && activity.isLaunchedFromBubble();
+    }
+
+    /**
+     * Whether [activity] is a chat Android shows in a bubble. Besides the bubble's own screen name and
+     * isLaunchedFromBubble(), which some phones get wrong, a screen in multi-window mode or in a window narrower than
+     * the phone counts too. Anything counted wrongly just keeps Messenger's own look, so effects that blur or tint a
+     * chat leave it alone. Never throws.
+     */
+    static boolean inBubbleActivity(Activity activity) {
+        try {
+            if (activity == null) return false;
+            if (BUBBLE_ACTIVITY.equals(activity.getClass().getName())) return true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && activity.isLaunchedFromBubble()) return true;
+            if (activity.isInMultiWindowMode()) return true;
+            Window window = activity.getWindow();
+            View root = window == null ? null : window.peekDecorView();
+            int screen = activity.getResources().getDisplayMetrics().widthPixels;
+            return root != null && root.getWidth() > 0 && root.getWidth() < screen * 0.98f;
+        } catch (Throwable error) {
+            return false;
+        }
     }
 }

@@ -71,6 +71,8 @@ public final class MenuBlur {
             WindowManager.LayoutParams attributes = window.getAttributes();
             boolean dims = (attributes.flags & WindowManager.LayoutParams.FLAG_DIM_BEHIND) != 0 && attributes.dimAmount > 0f;
             if (!dims && !holdsMessageMenu(window.peekDecorView())) return;
+            // In a bubble the sheet under the message box (the gallery's) came up dimmed with nothing to see on it.
+            if (ChatHeadVideo.inBubbleActivity(activity(dialog.getContext()))) return;
             if (!Settings.enabled(KEY)) return;
             if (available.test(window)) blur(window, attributes, dims);
             else blurScreen(dialog, window, attributes, dims);
